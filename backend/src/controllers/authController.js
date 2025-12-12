@@ -1,5 +1,6 @@
 import User from "../models/User.js";  
-import { ErrorResponse  } from "../middleware/error.js";
+import { ErrorResponse  } from "../middleware/error.middleware.js";
+import Product from "../models/Product.js";
 
 
 // Register a new user
@@ -7,6 +8,7 @@ import { ErrorResponse  } from "../middleware/error.js";
 // Public
 export const register = async (req, res, next) => {
     try {
+        console.log('JWT_SECRET:', process.env.JWT_SECRET);
         const { firstName, lastName, email, password, role } = req.body;
 
         // Check if user already exists

@@ -1,5 +1,6 @@
 
 import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -11,11 +12,12 @@ import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 
 import authRoutes from './routes/auth.routes.js';
+import productRoutes from './routes/product.routes.js';
 
 
 // Initialize Express app
 const app = express();
-dotenv.config();
+
 
 
 // Connect to database
@@ -55,6 +57,7 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 
 
 // root route

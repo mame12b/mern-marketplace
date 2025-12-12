@@ -57,18 +57,22 @@ userSchema.methods.comparePassword = function(candidatePassword) {
 
 // Method to generate JWT
 userSchema.methods.generateJWT = function() {
+    if (!process.env.JWT_SECRET) 
+        throw new Error("JWT_SECRET is not defined in environment variables");
     return jwt.sign(
         { id: this._id, role: this.role },
         process.env.JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
 };
 //   generate refresh token
 userSchema.methods.generateRefreshToken = function() {
+    if (!process.env.JWT_REFRESH_SECRET) 
+        throw new Error("JWT_REFRESH_SECRET is not defined in environment variables");
     return jwt.sign(
         { id: this._id },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '30d' }
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_EXPIRE || '30d' }
     );
 };
 // generate email verification token
