@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 import Product from "../models/Product.js";
-import { ErrorResponse } from  "../middleware/errorMiddleware.js";
-import { use } from "react";
+import { ErrorResponse } from  "../middleware/error.middleware.js";
+
 
 
 // update user profile
@@ -220,6 +220,62 @@ export const getWishlist = async (req, res, next) => {
         next(error);
     }
 };
+
+// aadd to cart
+// POST /api/users/cart
+// Private
+export const addToCart = async (req, res, next) => {
+    try {
+        const { productId, quantity = 1} = req.body;
+
+        const user = await User.findById(req.user.id);
+        const product = await Product.findById(productId);
+
+        if (!product) {
+            return next(new ErrorResponse("Product not found", 404));
+        }
+
+        if (product.status !== 'available') {  
+            return next(new ErrorResponse("Product is not available", 400));
+        }
+
+        if (product.stock < quantity) {
+            return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
+        }
+        // check if product already in cart
+        const existingItem = user.cart.find(
+            item => item.product.toString() === productId
+        );
+
+        if (existingItem) {
+            // update quantity
+            existingItem.quantity += quantity;
+            if (existingItem.quantity > product.stock) {
+                return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
+            }
+        } else {
+            // add new item to cart
+            user.cart.push({ 
+                product: productId, 
+                quantity 
+            });
+        }
+        await user.save();
+
+        await user.populate({'cart.product': 'title price images stock'});
+
+        res.status(200).json({
+            success: true,
+            message: "Product added to cart",
+            data: user.cart
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 // update cart item
 // PUT /api/users/cart/:productId
 // Private

@@ -1,6 +1,7 @@
 
 import dotenv from 'dotenv';
 dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -13,6 +14,12 @@ import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 import authRoutes from './routes/auth.routes.js';
 import productRoutes from './routes/product.routes.js';
+import orderRoutes from './routes/order.routes.js';
+import userRoutes from './routes/users.routes.js';
+import categoryRoutes from './routes/category.routes.js';
+import reviewRoutes from './routes/review.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+
 
 
 // Initialize Express app
@@ -58,6 +65,11 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/admin', adminRoutes);
 
 
 // root route
