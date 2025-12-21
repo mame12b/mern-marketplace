@@ -1,15 +1,20 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import  api from "../../utils/axios";
 
-export const getProducts = () => createAsyncThunk(
+
+
+
+export const getProducts =  createAsyncThunk(
   "products/getProducts", 
   async (_, {rejectWithValue}) => {
   
     try {
-      const { data } = await axios.get("/api/products");
+      const { data } = await api.get("/api/products");
       return data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || error.message
+      );
     }
   }
 );
@@ -22,25 +27,28 @@ const productsSlice = createSlice({
     error: null,
   },
   reducers: {},
-//     // setProducts: (state, action) => {
-//     //     state.list = action.payload;
-//     // },
-// },
 extraReducers: (builder) => {
     builder
       .addCase(getProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(getProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = action.payload;
-      })
+    .addCase(getProducts.fulfilled, (state, action) => {
+  state.loading = false;
+
+  // ✅ normalize API response
+  state.items = Array.isArray(action.payload)
+    ? action.payload
+    : action.payload.products || action.payload.data || [];
+})
+
       .addCase(getProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
-      });
+        state.error = action.payload || action.error.message;
+      })
+ ;
+
   },
 });
-export const { setProducts } = productsSlice.actions;
+
 export default productsSlice.reducer;

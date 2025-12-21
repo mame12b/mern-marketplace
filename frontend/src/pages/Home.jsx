@@ -12,12 +12,17 @@ import { toast } from "react-toastify";
 
 const Home = () => {
   const dispatch = useDispatch();
-  const { products, isLoading } = useSelector((state) => state.products);
+  const {
+    items: products = [],
+    loading: isLoading,
+    
+
+  } = useSelector((state) => state.products || {});
   const { user } = useSelector((state) => state.auth);
 
     useEffect(() => {
-    dispatch(getProducts({limit: 8}));
-    }, [dispatch]);
+       dispatch(getProducts());
+    },  [dispatch]);
 
   const handleAddToCart = (product) => {
     if (!user) {
@@ -54,43 +59,49 @@ const Home = () => {
   return (
     <div>
         {/* Hero Section */}
-    <section className="bg-gradient-to-r from-primary-500 to-primary-600 text-white py-20">
+    <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
 
-        <div className="container mx-auto px-4 text-center">
-        <div className="max-w-2xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Welcome to ShopEase</h1>
-            <p className="text-lg md:text-xl mb-8">Your one-stop shop for all your needs</p>
-            <Link to="/products">
-            <Button variant="light" size="lg">Shop Now</Button>
+        {/* <div className="container mx-auto px-4 text-center"> */}
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+            <h1 className="text-4xl md:text-5xl font-extrabold">
+          Welcome to <span className="text-yellow-300">ShopEase</span>
+            </h1>
+
+            <p className="mt-4 text-lg text-blue-100 max-w-xl mx-auto">Your one-stop shop for all your needs</p>
+
+            <div className="mt-8">
+            <Link 
+            to="/products"
+            className="inline-block bg-white text-blue-700 px-8 py-3 round-xl font-semibold shadow-lg hover:bg-gray-100 transition"
+            
+            >
+          
+            Shop Now
             </Link>
         </div>
      </div>
     </section>
 
     {/* Features  */}
-    <section className="py-12 bg-graay-50">
-        <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {features.map((feature, index) => {
-               const Icon = feature.icon;
-               return (
-                <div key={index} className="bg-white p-6 rounded-lg shadow text-center">
-                <div className="inline-flex items-center  justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-                    <Icon className="text-3xl text-primary-600" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-                </div>
-               );
-            })}
-        </div>
-        </div>
-    </section>
+ {features.map((feature, index) => (
+  <div key={index} 
+  className="bg-gray-50 rounded-2xl p-8 shadow-sm hover:shadow-lg transition transform hover:-translate-y-1 text-center">
+    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+      {feature.icon}   
+      
+      {/* ✅ ONLY THIS */}
+    </div>
+    <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
+    <p className="mt-2 text-sm text-gray-600">{feature.description}</p>
+  </div>
+))}
+
 
     {/* Featured Products Section */} 
-    <section className="py-16">
-        <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
+    <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 items-center mb-12">
+
             <h2 className="text-3xl font-bold">Featured Products</h2>
             <Link to="/products">
             <Button variant="primary">View All Products</Button>

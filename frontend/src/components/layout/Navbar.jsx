@@ -1,20 +1,29 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {useSelector, useDispatch} from "react-redux";
-import { FaShoppingCart, FaUser, FaHeart, FaSearch, FaBars, FaTimes } from "react-icons/fa";
+import {
+    FaShoppingCart, 
+    FaUser, 
+    FaHeart, 
+    FaSearch, 
+    FaBars, 
+    FaTimes 
+} from "react-icons/fa";
+
 
 import { logout } from "../../redux/slices/authSlice";
 import { toast } from "react-toastify"
 
 
 export const Navbar = () => {
-    const [mobleMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
     const { user } = useSelector((state) => state.auth);
-    const { itemCount } = useSelector((state) => state.cart);
+    const { itemCount = 0 } = useSelector((state) => state.cart || {});
 
     const handleLogout = () => {
         dispatch(logout());
@@ -26,32 +35,38 @@ export const Navbar = () => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate(`/products?search=${searchQuery}`);
+            setMobileMenuOpen(false);
         }
     };
 
     return (
-        <nav className="bg-white shadow-md sticky top-0 z-50">
+        <nav className="bg-white shadow-md border-b border-gray-200 sticky top-0 z-50">
+
             {/* Top Bar */}
             <div className="bg-primary-600 text-white text-sm">
             <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-
                 <span>Free Shipping on Orders Over $50!</span>
                 <div className="flex items-center gap-4">
                     <Link to="/help" className="hover:text-primary-300">Help</Link>
                     <Link to="/track-order" className="hover:text-primary-300">Track Order</Link>
-
                     </div>
                     </div>
                 </div>
+
             {/* Main Navbar */}
             <div className="container mx-auto px-4 py-4 flex items-center justify-between">
                 {/* Logo */}
-                <Link to="/" className="text-2xl font-bold text-primary-600">
+                <Link to="/" 
+                       className="text-2xl font-extrabold tracking-tight text-primary-900">
+
                     Marketplace
                 </Link>
 
                 {/* Search Bar */}
-                <form onSubmit={handleSearchSubmit} className="flex-grow mx-4 hidden md:flex">
+                <form 
+                onSubmit={handleSearchSubmit} 
+                className="flex-grow mx-4 hidden md:flex">
+                    
                     <div className="relative w-full">
                     <input 
                         type="text"
@@ -70,7 +85,7 @@ export const Navbar = () => {
 
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center gap-6">
-                    <Link to="/products" className="relative hover:text-primary-600 transition-colors">
+                    <Link to="/products" className="font-medium text-gray-700 hover:text-blue-600">
                         Products
                     </Link>
 
@@ -153,14 +168,15 @@ export const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <button 
-                onClick={()=> setMobileMenuOpen(!mobleMenuOpen)  }
+                onClick={()=> setMobileMenuOpen(!mobileMenuOpen)  }
                 className="md:hidden text-primary-600 focus:outline-none">
-                    {mobleMenuOpen ? <FaTimes className="text-2xl"/> : <FaBars className="text-2xl"/>}
+                    {mobileMenuOpen ? <FaTimes className="text-2xl"/> : <FaBars className="text-2xl"/>}
                 </button>
             </div>
 
             {/* mobile search */}
-            <form onSubmit={handleSearchSubmit} className= "px-4 pb-4 md:hidden ">
+            <form onSubmit={handleSearchSubmit} className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-500 focus:outline-none"
+>
                 <div className="relative w-f">
                     <input 
                         type="text"
@@ -177,7 +193,7 @@ export const Navbar = () => {
             </form>
 
             {/* Mobile Menu */}
-            {mobleMenuOpen && (
+            {mobileMenuOpen && (
                 <div className="md:hidden px-4 pb-4 space-y-4">
                     <Link to="/products" className="block hover:text-primary-600 transition-colors">
                         Products
@@ -187,9 +203,8 @@ export const Navbar = () => {
                         <>
                             <Link 
                                 to="/cart" 
-                                className="block hover:text-primary-600 transition-colors">
-                                    onClick= {() => setMobileMenuOpen(false)}
-
+                                className="block hover:text-primary-600 transition-colors"
+                                onClick= {() => setMobileMenuOpen(false)}>
                                 Cart {itemCount > 0 && `(${itemCount})`}
                             </Link>
                             <Link 
@@ -241,4 +256,4 @@ export const Navbar = () => {
         </nav>
     );                            
 };
-
+export default Navbar;

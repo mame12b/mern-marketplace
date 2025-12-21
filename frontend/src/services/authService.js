@@ -1,17 +1,17 @@
-import axios from 'axios';
+import api from '../utils/axios';
 
-const API_URL = 'http://localhost:5000/api/auth/';
+// const API_URL = 'http://localhost:5000/api/auth/';
 
-export const register = async (userData) => {
-  const response = await axios.post (API_URL + 'register', userData);
+export const registerUser = async (userData) => {
+  const response = await api.post ("/api/auth/register", userData);
   if (response.data.token) {
     localStorage.setItem('user', JSON.stringify(response.data));
     localStorage.setItem('token', response.data.token);
   }
   return response.data;
 };
-export const login = async (userData) => {
-  const response = await axios.post(API_URL + 'login', userData);
+export const loginUser = async (userData) => {
+  const response = await api.post("/api/auth/login", userData);
   if (response.data.token) {
     localStorage.setItem('user', JSON.stringify(response.data));
     localStorage.setItem('token', response.data.token);
@@ -26,7 +26,7 @@ export const logout = () => {
 
 export const getMe = async () => {
   const token = localStorage.getItem('token');
-  const response = await axios.get(API_URL + 'me', {
+  const response = await api.get("/api/auth/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
