@@ -1,9 +1,37 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { registerUser, loginUser } from '../../services/authService';
 
+const hasWindow = 
+typeof window !== 'undefined' &&
+typeof window.localStorage !== 'undefined';
+
+const getStored = (key) => (hasWindow ? window.localStorage.getItem(key) : null);
+
+
+const clearStoredSession = () => {
+  if (!hasWindow) return;
+  window.localStorage.removeItem('user');
+  window.localStorage.removeItem('token');
+};
+
+const safeParse = (value) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+
+  } catch  {
+    // Corrupted storage value; clear it so it doesn't break hydration.
+    clearStoredSession();
+    return null;
+  }
+};
+
+const storedUser = safeParse(getStored('user'));
+const storedToken = getStored('token');
+
 const initialState = {
-  user: null,
-  token: null,
+  user: storedUser?.data || storedUser || null,
+  token: storedToken || null,
   loading: false,
   error: null,
   message: "",
@@ -17,7 +45,7 @@ export const  login = createAsyncThunk(
             return await loginUser(userData);
         } catch (error) {
             return thunkAPI.rejectWithValue(
-                error.response.data.message || 'Login failed'
+                error?.response?.data?.message || error?.message || 'Login failed'
             );
         }
     }
@@ -30,7 +58,7 @@ export const register = createAsyncThunk(
             return await registerUser(userData);
         } catch (error) {
             return thunkAPI.rejectWithValue(
-                error.response.data.message || 'Registration failed'
+                error?.response?.data?.message || error?.message || 'Registration failed'
             );
         }
     }
@@ -46,10 +74,13 @@ const authSlice = createSlice({
             state.token = null;
             state.loading = false;
             state.error = null;
+            state.message = "";
+            clearStoredSession();
         },
         reset: (state) => {
             state.loading = false;
             state.error = null;
+            state.message = "";
         },
   
     },
@@ -62,9 +93,10 @@ const authSlice = createSlice({
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
+                state.user = action.payload.user || action.payload.data || null;
+                state.token = action.payload.token || null;
                 state.error = null;
+                state.message = action.payload.message || "";
             })
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
@@ -78,9 +110,10 @@ const authSlice = createSlice({
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.token = action.payload.token;
+                state.user = action.payload.user || action.payload.data || null;
+                state.token = action.payload.token || null;
                 state.error = null;
+                state.message = action.payload.message || "";
             })
             .addCase(register.rejected, (state, action) => {
                 state.loading = false;

@@ -6,7 +6,7 @@ import Product from "../models/Product.js";
 // Register a new user
 // POST /api/auth/register
 // Public
-export const register = async (req, res, next) => {
+export const registerUser = async (req, res, next) => {
     try {
         console.log('JWT_SECRET:', process.env.JWT_SECRET);
         const { firstName, lastName, email, password, role } = req.body;
@@ -41,7 +41,7 @@ export const register = async (req, res, next) => {
 // login user
 // POST /api/auth/login
 // Public
-export const login = async (req, res, next) => {
+export const loginUser = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -105,7 +105,7 @@ export const getMe = async (req, res, next) => {
 // logout user / clear cookie
 // GET /api/auth/logout
 // Private
-export const logout = async (req, res, next) => {
+export const logoutUser = async (req, res, next) => {
     try {
         res.cookie('refreshToken', 'none', {
             expires: new Date(Date.now() + 10 * 1000),

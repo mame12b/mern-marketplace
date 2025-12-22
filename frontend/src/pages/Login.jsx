@@ -31,7 +31,7 @@ const Login = () => {
          dispatch(reset());
       }
       if (user) {
-         navigate('/');
+         navigate('/products');
       }
    }, [user, error, navigate, dispatch]);
 

@@ -1,35 +1,51 @@
 import api from '../utils/axios';
 
-// const API_URL = 'http://localhost:5000/api/auth/';
+const persistSession = (user, token) => {
+  if (user && token) {
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', token);
+  }
+};
 
-export const registerUser = async (userData) => {
-  const response = await api.post ("/api/auth/register", userData);
-  if (response.data.token) {
-    localStorage.setItem('user', JSON.stringify(response.data));
-    localStorage.setItem('token', response.data.token);
-  }
-  return response.data;
-};
-export const loginUser = async (userData) => {
-  const response = await api.post("/api/auth/login", userData);
-  if (response.data.token) {
-    localStorage.setItem('user', JSON.stringify(response.data));
-    localStorage.setItem('token', response.data.token);
-  }
-  return response.data;
-};
-export const logout = () => {
+
+
+const clearSession = () => {
+  if (typeof window === 'undefined') return;
   localStorage.removeItem('user');
   localStorage.removeItem('token');
+};
 
+export const registerUser = async (userData) => {
+  const res = await api.post("/api/auth/register", userData);
+  
+
+  const { user, token, message } = res.data;
+  persistSession(user, token);
+  return { user, token, message };
+};
+
+export const loginUser = async (userData) => {
+  const res = await api.post("/api/auth/login", userData);
+
+  const { user, token, message } = res.data;
+
+  persistSession(user, token);
+
+  return { user, token, message };
+};
+
+export const logoutUser = async () => {
+  try {
+    await api.get("/api/auth/logout");
+  } catch (error) {
+    // even if the API call fails, ensure local session is cleared
+    console.error("Logout request failed", error);
+  } finally {
+   clearSession();
+  }
 };
 
 export const getMe = async () => {
-  const token = localStorage.getItem('token');
-  const response = await api.get("/api/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
+  const res = await api.get("/api/auth/me");
+  return res.data;
 };

@@ -41,8 +41,8 @@ app.use(helmet());
 
 // CORS 
 const corsOptions = {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: process.env.CLIENT_URL,
+    methods:['GET','HEAD','PUT','PATCH','POST','DELETE'],
     credentials: true,
     optionsSuccessStatus: 200,
 };
