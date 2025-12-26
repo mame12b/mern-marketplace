@@ -7,6 +7,8 @@ import store from './redux/store';
 
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/auth/PrivateRoute';
+import RoleBasedRoute from './components/auth/RoleBasedRoute';
+import DashboardRedirect from './components/auth/DashboardRedirect';
 
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -18,6 +20,12 @@ import Register from './pages/Register';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import SellerApplication from './pages/SellerApplication';
+
+// Role-based Dashboards
+import BuyerDashboard from './pages/BuyerDashboard';
+import SellerDashboard from './pages/SellerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 
 
@@ -39,11 +47,28 @@ function App() {
         <Route path = '/login' element = {<Login />} />
         <Route path = '/register' element = {<Register />} />
       
-        {/* protected routes */}
+        {/* Protected routes - All authenticated users */}
       <Route element={<PrivateRoute />}>
+        <Route path='/dashboard' element={<DashboardRedirect />} />
         <Route path='/checkout' element={<Checkout />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/orders' element={<Orders />} />
+        <Route path='/seller/apply' element={<SellerApplication />} />
+      </Route>
+
+        {/* Buyer-only routes */}
+      <Route element={<RoleBasedRoute allowedRoles={['buyer']} />}>
+        <Route path='/buyer/dashboard' element={<BuyerDashboard />} />
+      </Route>
+
+        {/* Seller-only routes */}
+      <Route element={<RoleBasedRoute allowedRoles={['seller']} />}>
+        <Route path='/seller/dashboard' element={<SellerDashboard />} />
+      </Route>
+
+        {/* Admin-only routes */}
+      <Route element={<RoleBasedRoute allowedRoles={['admin']} />}>
+        <Route path='/admin/dashboard' element={<AdminDashboard />} />
       </Route>
 
         {/* 404 Not Found */}

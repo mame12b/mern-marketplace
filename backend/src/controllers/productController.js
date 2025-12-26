@@ -130,6 +130,11 @@ export const createProduct = async (req, res, next) => {
             return next(new ErrorResponse("Not authorized to create products", 403));
         }
 
+        // Check if seller has paid application fee (admins are exempt)
+        if (req.user.role === 'seller' && !req.user.sellerApplicationFeePaid) {
+            return next(new ErrorResponse("You must pay the seller application fee before posting products. Please complete your seller application.", 403));
+        }
+
         const product = await Product.create({
             ...req.body,
             seller: req.user.id

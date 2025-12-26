@@ -19,6 +19,7 @@ import userRoutes from './routes/users.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import reviewRoutes from './routes/review.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import sellerRoutes from './routes/seller.routes.js';
 
 
 
@@ -70,6 +71,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/seller', sellerRoutes);
 
 
 // root route

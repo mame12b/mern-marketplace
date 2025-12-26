@@ -8,7 +8,6 @@ import Product from "../models/Product.js";
 // Public
 export const registerUser = async (req, res, next) => {
     try {
-        console.log('JWT_SECRET:', process.env.JWT_SECRET);
         const { firstName, lastName, email, password, role } = req.body;
 
         // Check if user already exists
@@ -46,11 +45,6 @@ export const loginUser = async (req, res, next) => {
         const { email, password } = req.body;
 
         // Validate email & password
-        if (!email || !password) {
-            return next(new ErrorResponse("Please provide email and password", 400));
-        }
-
-        //  validate email & password
         if (!email || !password) {
             return next(new ErrorResponse("Please provide email and password", 400));
         }
@@ -95,7 +89,7 @@ export const getMe = async (req, res, next) => {
         
         res.status(200).json({ 
             success: true,
-            data: user 
+            user 
         });
     } catch (error) {
         next(error);
@@ -126,10 +120,10 @@ export const logoutUser = async (req, res, next) => {
 // Public
 export const verifyEmail = async (req, res, next) => {
     try {
-        const { token } = req.query;
+        const { token } = req.params;
 
         const user = await User.findOne({
-            emailVerificationToken: req.params.token,
+            emailVerificationToken: token,
         });
 
         if (!user) {
@@ -229,6 +223,6 @@ const sendTokenResponse = (user, statusCode, res, message) => {
         success: true,
         message,
         token,
-        data: user,
+        user,
     });
 };  

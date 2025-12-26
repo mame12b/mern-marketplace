@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema({
     shopLogo: { type: String },
     sellerRating: { type: Number, min: 0, max: 5, default: 0 },
     totalSales: { type: Number, default: 0 },
+    // Seller Application Fee
+    sellerApplicationFeePaid: { type: Boolean, default: false },
+    sellerApplicationFeeAmount: { type: Number, default: 50 }, // $50 application fee
+    sellerApplicationFeePaidAt: { type: Date },
+    sellerApplicationFeeTransactionId: { type: String },
+    sellerApplicationStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
 }, { timestamps: true });
 
 // Hash password before saving

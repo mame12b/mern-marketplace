@@ -7,6 +7,7 @@ import Button from '../components/common/Button';
 import { toast } from 'react-toastify';
 import Card from '../components/common/Card';
 import Input from '../components/common/Input';
+import BackButton from '../components/common/BackButton';
 
 
 
@@ -31,7 +32,16 @@ const Login = () => {
          dispatch(reset());
       }
       if (user) {
-         navigate('/products');
+         // Redirect based on user role
+         if (user.role === 'admin') {
+            navigate('/admin/dashboard');
+         } else if (user.role === 'seller') {
+            navigate('/seller/dashboard');
+         } else if (user.role === 'buyer') {
+            navigate('/buyer/dashboard');
+         } else {
+            navigate('/products');
+         }
       }
    }, [user, error, navigate, dispatch]);
 
@@ -58,6 +68,7 @@ const Login = () => {
   return (
     <div className='min-h-[calc(100vh-200px)] flex items-center justify-center bg-gray-50 py-12 px-4' >
       <div className='max-w-md w-full'>
+        <BackButton to="/" className="mb-4" />
         <div className='text-center mb-8'>
         <h1 className='text-3xl font-bold text-gray-900 mb-2'>Welcome Back</h1>
         <p className='text-gray-600'>Login to your account</p>

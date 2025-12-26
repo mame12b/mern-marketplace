@@ -30,7 +30,7 @@ const storedUser = safeParse(getStored('user'));
 const storedToken = getStored('token');
 
 const initialState = {
-  user: storedUser?.data || storedUser || null,
+  user: storedUser || null,
   token: storedToken || null,
   loading: false,
   error: null,
@@ -90,16 +90,19 @@ const authSlice = createSlice({
         // Login Cases
             .addCase(login.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(login.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user || action.payload.data || null;
+                state.user = action.payload.user || null;
                 state.token = action.payload.token || null;
                 state.error = null;
                 state.message = action.payload.message || "";
             })
             .addCase(login.rejected, (state, action) => {
                 state.loading = false;
+                state.user = null;
+                state.token = null;
                 state.error = action.payload;
                 state.message = action.payload;
             })
@@ -107,16 +110,19 @@ const authSlice = createSlice({
         // Register Cases
             .addCase(register.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(register.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user || action.payload.data || null;
+                state.user = action.payload.user || null;
                 state.token = action.payload.token || null;
                 state.error = null;
                 state.message = action.payload.message || "";
             })
             .addCase(register.rejected, (state, action) => {
                 state.loading = false;
+                state.user = null;
+                state.token = null;
                 state.error = action.payload;
                 state.message = action.payload;
             });
