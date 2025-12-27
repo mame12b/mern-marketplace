@@ -1,4 +1,5 @@
 import User from "../models/User.js";  
+import { registerService, loginService } from "../services/auth.service.js";    
 import { ErrorResponse  } from "../middleware/error.middleware.js";
 import Product from "../models/Product.js";
 
@@ -7,75 +8,25 @@ import Product from "../models/Product.js";
 // POST /api/auth/register
 // Public
 export const registerUser = async (req, res, next) => {
-    try {
-        const { firstName, lastName, email, password, role } = req.body;
-
-        // Check if user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return next(new ErrorResponse("User already exists", 400));
-        }
-
-        // Create new user
-        const user = await  User.create({
-            firstName,
-            lastName, 
-            email, 
-            password, 
-            role: role || 'buyer',
-        });
-      
-        // Generate email verification token
-        const verificationToken = user.generateEmailVerificationToken();
-        await user.save();
-
-        // TODO: Send verification email
-        // await sendVerificationEmail(user.email, verificationToken);
-        sendTokenResponse(user, 201, res, "Registration successful. Please verify your email.");
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const result = await registerService(req.body);
+    return res.status(201).json(result); // <-- RETURN stops execution
+  } catch (error) {
+    next(error);
+  }
 };
+
 
 // login user
 // POST /api/auth/login
 // Public
 export const loginUser = async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-
-        // Validate email & password
-        if (!email || !password) {
-            return next(new ErrorResponse("Please provide email and password", 400));
-        }
-
-        // Check for user
-        const user = await User.findOne({ email }).select("+password");
-
-        if (!user) {
-            return next(new ErrorResponse("Invalid credentials", 401));
-        }
-
-        // Check if password matches
-        const isMatch = await user.comparePassword(password);
-
-        if (!isMatch) {
-            return next(new ErrorResponse("Invalid credentials", 401));
-        }
-
-        // check account status
-        if (user.accountStatus !== 'active') {
-            return next(new ErrorResponse(`Account is ${user.accountStatus}. Please contact support.`, 403));
-        }
-
-        // update last login
-        user.lastLogin = Date.now();
-        await user.save();
-
-        sendTokenResponse(user, 200, res, "Login successful");
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const result = await loginService(req.body);
+    return res.status(200).json(result); // <-- RETURN stops execution
+  } catch (error) {
+    next(error);
+  }
 };
 
 // get current logged in user
