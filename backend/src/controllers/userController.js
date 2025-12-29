@@ -173,6 +173,30 @@ export const removeFromWishlist = async (req, res, next) => {
 // Private
 export const getWishlist = async (req, res, next) => {
     try {
+        const user = await User.findById(req.user.id).populate({
+            path: 'wishlist',
+            select: 'title price comparePrice images rating reviewCount stock status seller',
+            populate: {
+                path: 'seller',
+                select: 'shopName sellerRating'
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            count: user.wishlist.length,
+            data: user.wishlist
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// add to cart
+// POST /api/users/cart
+// Private
+export const addToCart = async (req, res, next) => {
+    try {
         const { productId, quantity = 1} = req.body;
 
         const user = await User.findById(req.user.id);
@@ -182,7 +206,7 @@ export const getWishlist = async (req, res, next) => {
             return next(new ErrorResponse("Product not found", 404));
         }
 
-        if (product.status !== 'available') {  
+        if (product.status !== 'active') {  
             return next(new ErrorResponse("Product is not available", 400));
         }
 
@@ -224,55 +248,55 @@ export const getWishlist = async (req, res, next) => {
 // aadd to cart
 // POST /api/users/cart
 // Private
-export const addToCart = async (req, res, next) => {
-    try {
-        const { productId, quantity = 1} = req.body;
+// export const addToCart = async (req, res, next) => {
+//     try {
+//         const { productId, quantity = 1} = req.body;
 
-        const user = await User.findById(req.user.id);
-        const product = await Product.findById(productId);
+//         const user = await User.findById(req.user.id);
+//         const product = await Product.findById(productId);
 
-        if (!product) {
-            return next(new ErrorResponse("Product not found", 404));
-        }
+//         if (!product) {
+//             return next(new ErrorResponse("Product not found", 404));
+//         }
 
-        if (product.status !== 'available') {  
-            return next(new ErrorResponse("Product is not available", 400));
-        }
+//         if (product.status !== 'available') {  
+//             return next(new ErrorResponse("Product is not available", 400));
+//         }
 
-        if (product.stock < quantity) {
-            return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
-        }
-        // check if product already in cart
-        const existingItem = user.cart.find(
-            item => item.product.toString() === productId
-        );
+//         if (product.stock < quantity) {
+//             return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
+//         }
+//         // check if product already in cart
+//         const existingItem = user.cart.find(
+//             item => item.product.toString() === productId
+//         );
 
-        if (existingItem) {
-            // update quantity
-            existingItem.quantity += quantity;
-            if (existingItem.quantity > product.stock) {
-                return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
-            }
-        } else {
-            // add new item to cart
-            user.cart.push({ 
-                product: productId, 
-                quantity 
-            });
-        }
-        await user.save();
+//         if (existingItem) {
+//             // update quantity
+//             existingItem.quantity += quantity;
+//             if (existingItem.quantity > product.stock) {
+//                 return next(new ErrorResponse("Insufficient stock for the requested quantity", 400));
+//             }
+//         } else {
+//             // add new item to cart
+//             user.cart.push({ 
+//                 product: productId, 
+//                 quantity 
+//             });
+//         }
+//         await user.save();
 
-        await user.populate({'cart.product': 'title price images stock'});
+//         await user.populate({'cart.product': 'title price images stock'});
 
-        res.status(200).json({
-            success: true,
-            message: "Product added to cart",
-            data: user.cart
-        });
-    } catch (error) {
-        next(error);
-    }
-};
+//         res.status(200).json({
+//             success: true,
+//             message: "Product added to cart",
+//             data: user.cart
+//         });
+//     } catch (error) {
+//         next(error);
+//     }
+// };
 
 
 

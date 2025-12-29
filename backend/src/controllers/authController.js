@@ -110,15 +110,18 @@ export const forgotPassword = async (req, res, next) => {
         // Generate reset token
         const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         user.resetPasswordToken = resetToken;
-        // user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
         await user.save();
 
+        // Create reset URL
+        const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
 
-        // TODO: send reset  password email
-        // await sendResetPasswordEmail(user.email, resetToken);
+        // TODO: send reset password email using nodemailer
+        // For now, return the token in response (remove in production)
         res.status(200).json({
             success: true,
-            message: "Password reset token generated and sent to email",
+            message: "Password reset link has been sent to your email",
+            resetUrl, // Remove this in production
         });
     } catch (error) {
         next(error);
@@ -135,7 +138,7 @@ export const resetPassword = async (req, res, next) => {
 
         const user = await User.findOne({
             resetPasswordToken: token,
-            // resetPasswordExpires: { $gt: Date.now() },
+            resetPasswordExpires: { $gt: Date.now() },
         });
 
         if (!user) {
@@ -144,9 +147,8 @@ export const resetPassword = async (req, res, next) => {
 
         user.password = newPassword;
         user.resetPasswordToken = undefined;
-        // user.resetPasswordExpires = undefined;
+        user.resetPasswordExpires = undefined;
         await user.save();
-
 
         sendTokenResponse(user, 200, res, "Password reset successful");
     } catch (error) {

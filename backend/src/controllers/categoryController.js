@@ -1,4 +1,4 @@
-import Category from "../models/Category.js ";
+import Category from "../models/Category.js";
 import Product from "../models/Product.js";
 import { ErrorResponse } from "../middleware/error.middleware.js";
 
@@ -9,21 +9,21 @@ export const getCategories = async (req, res, next) => {
 
         // get only parent categories if specified
         if (req.query.parent === 'null') {
-            query.parent = null;
+            query.parentCategory = null;
 
         } else if (req.query.parent) {
-            query.parent = req.query.parent;
+            query.parentCategory = req.query.parent;
         }
 
         const categories = await Category.find(query)
         .sort('order name')
-        .populate('parent', 'name slug');
+        .populate('parentCategory', 'name slug');
 
         // get subcategories for each category
         const categoriesWithSubcategories = await Promise.all(
             categories.map(async (category) => {
             const subcategories = await Category.find({ 
-                parent: category._id, 
+                parentCategory: category._id, 
                 isActive: true 
             })
             .sort('order name');

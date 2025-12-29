@@ -10,31 +10,80 @@ export const getProducts = async (req, res, next) => {
         const reqQuery = { ...req.query };
 
         // fields to exclude
-        const removeFields = ['select', 'sort', 'page', 'limit'];
+        const removeFields = ['select', 'sort', 'page', 'limit', 'search', 'minPrice', 'maxPrice', 'minRating', 'brand', 'tags', 'featured', 'inStock'];
 
         // loop over removeFields and delete them from reqQuery
         removeFields.forEach(param => delete reqQuery[param]);
 
         // build query 
-        let query = { status: 'active' };
+        let query = {};
+
+        // Status filter - default to active for public, but allow all for admins
+        if (req.user?.role !== 'admin') {
+            query.status = 'active';
+        } else if (req.query.status) {
+            query.status = req.query.status;
+        }
 
         // category filter
-        if (reqQuery.category) {
-            query.category = reqQuery.category;
+        if (req.query.category) {
+            query.category = req.query.category;
+        }
+
+        // Subcategory filter
+        if (req.query.subcategory) {
+            query.subcategory = req.query.subcategory;
         }
 
         // price filter
-        if (reqQuery.minPrice || reqQuery.maxPrice) {
+        if (req.query.minPrice || req.query.maxPrice) {
             query.price = {};
-            if (reqQuery.minPrice) 
-                query.price.$gte = Number(reqQuery.minPrice);
-            if (reqQuery.maxPrice) 
-                query.price.$lte = Number(reqQuery.maxPrice); 
+            if (req.query.minPrice) 
+                query.price.$gte = Number(req.query.minPrice);
+            if (req.query.maxPrice) 
+                query.price.$lte = Number(req.query.maxPrice); 
         }
 
-        //  search functionality
+        // Rating filter
+        if (req.query.minRating) {
+            query.rating = { $gte: Number(req.query.minRating) };
+        }
+
+        // Brand filter
+        if (req.query.brand) {
+            query.brand = { $regex: req.query.brand, $options: 'i' };
+        }
+
+        // Tags filter
+        if (req.query.tags) {
+            const tags = req.query.tags.split(',');
+            query.tags = { $in: tags };
+        }
+
+        // Featured filter
+        if (req.query.featured === 'true') {
+            query.featured = true;
+        }
+
+        // In stock filter
+        if (req.query.inStock === 'true') {
+            query.stock = { $gt: 0 };
+        }
+
+        // Seller filter
+        if (req.query.seller) {
+            query.seller = req.query.seller;
+        }
+
+        //  search functionality - improved with regex for better results
         if (req.query.search) {
-            query.$text = { $search: req.query.search };
+            const searchRegex = { $regex: req.query.search, $options: 'i' };
+            query.$or = [
+                { title: searchRegex },
+                { description: searchRegex },
+                { brand: searchRegex },
+                { tags: searchRegex },
+            ];
         }
         // create query 
         let dbQuery = Product.find(query).populate('seller', 'firstName lastName email')

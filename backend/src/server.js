@@ -9,6 +9,8 @@ import helmet from 'helmet';
 import connectDB from './config/db.js';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 import { errorHandler, notFound } from './middleware/error.middleware.js';
 
 
@@ -20,12 +22,61 @@ import categoryRoutes from './routes/category.routes.js';
 import reviewRoutes from './routes/review.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import sellerRoutes from './routes/seller.routes.js';
+import couponRoutes from './routes/coupon.routes.js';
+import messageRoutes from './routes/message.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+import analyticsRoutes from './routes/analytics.routes.js';
 
 
 
 // Initialize Express app
 const app = express();
+const httpServer = createServer(app);
 
+// Initialize Socket.IO
+const io = new Server(httpServer, {
+    cors: {
+        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        credentials: true,
+    },
+});
+
+// Make io accessible to routes
+app.set('io', io);
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+
+    // Join user-specific room
+    socket.on('join', (userId) => {
+        socket.join(userId);
+        console.log(`User ${userId} joined their room`);
+    });
+
+    // Handle typing indicator
+    socket.on('typing', (data) => {
+        socket.to(data.conversationId).emit('userTyping', {
+            userId: data.userId,
+            conversationId: data.conversationId,
+        });
+    });
+
+    socket.on('stopTyping', (data) => {
+        socket.to(data.conversationId).emit('userStoppedTyping', {
+            userId: data.userId,
+            conversationId: data.conversationId,
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected:', socket.id);
+    });
+});
 
 
 // Connect to database
@@ -72,6 +123,10 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/seller', sellerRoutes);
+app.use('/api/coupons', couponRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 
 // root route
@@ -85,7 +140,7 @@ app.get('/', (req, res) => {
 // Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
-
+httpServer
 // Start server
 const PORT = process.env.PORT || 5000;
 
